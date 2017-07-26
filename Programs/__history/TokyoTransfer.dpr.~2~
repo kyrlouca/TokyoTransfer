@@ -1,0 +1,14 @@
+program TokyoTransfer;
+
+uses
+  Vcl.Forms,
+  M_Main in 'M_Main.pas' {M_MainFRM};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TM_MainFRM, M_MainFRM);
+  Application.Run;
+end.

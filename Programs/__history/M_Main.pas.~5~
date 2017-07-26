@@ -1,0 +1,171 @@
+unit M_Main;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Data.DB, DBAccess, IBC,
+  Vcl.Grids, vcl.wwdbigrd, vcl.wwdbgrid, MemDS, Vcl.Buttons, Datasnap.Provider,
+  Datasnap.DBClient, vcl.wwclient, VirtualTable, Vcl.DBCtrls;
+
+type
+  TM_MainFRM = class(TForm)
+    Button1: TButton;
+    OldDb: TIBCConnection;
+    NewDB: TIBCConnection;
+    OldRead: TIBCTransaction;
+    OldWrite: TIBCTransaction;
+    NewRead: TIBCTransaction;
+    NewWrite: TIBCTransaction;
+    t1SQL: TIBCQuery;
+    t1SRC: TIBCDataSource;
+    wwDBGrid1: TwwDBGrid;
+    VirtualTable1: TVirtualTable;
+    BitBtn1: TBitBtn;
+    DBMemo1: TDBMemo;
+    sourceSQL: TIBCQuery;
+    destSQL: TIBCQuery;
+    procedure Button1Click(Sender: TObject);
+  private
+    { Private declarations }
+
+  procedure ConnectToDatabase(dbConnection :TIBCConnection;FileName:String);
+  public
+    { Public declarations }
+  end;
+
+var
+  M_MainFRM: TM_MainFRM;
+
+implementation
+
+{$R *.dfm}
+
+procedure TM_MainFRM.Button1Click(Sender: TObject);
+begin
+  ConnectToDatabase(OldDB,'DatabaseParamsOld.txt');
+  t1SQL.Close;
+  t1SQL.Open;
+end;
+
+
+
+procedure TM_MainFRM.ConnectToDatabase(dbConnection :TIBCConnection;FileName:string);
+Var
+        FBClientPath:String;
+        InFile:TextFile;
+        LIne:String;
+        ServerIP,DatabasePath:String;
+        TextArray : Array [1..3] of String;
+        I:Integer;
+
+        LStrings: TStringList;
+begin
+
+//    FileName:= 'DatabaseParamsOld.txt';
+    LStrings := TStringList.Create;
+    try
+      LStrings.Loadfromfile(FileName);
+      if LStrings.Count<2 then begin
+        raise exception.create('File Must contain at least 2 lines');
+      end;
+      ServerIP:=LStrings[0];
+      DatabasePath:=LStrings[1];
+    finally
+      FreeAndNil(LStrings);
+    end;
+
+        dbConnection.Server:=ServerIP;
+        dbConnection.database:=DatabasePath;
+
+        FbClientPath:=ExtractFileDir( ExtractFilePath(Application.EXEName)  );
+        FbClientPath:=FBClientPath+'\gds32.dll';
+
+        dbConnection.ClientLibrary := FBClientPath;
+        If dbConnection.connected then
+                dbConnection.Disconnect;
+
+        dbConnection.Connect;
+        if not dbConnection.Connected then
+                ShowMessage('Cannot connect');
+
+
+End;
+
+
+{
+Function TReceiveTheInvoicesFRM.InsertDatasetRecord(SourceDataset:TDataSet;DestDataset:TDataset;KeyName:String;IsLogError:Boolean):Boolean;
+Var
+   SourceField,DestField:TField;
+   DestFieldName:String;
+   I:Integer;
+   Fname:String;
+   KeyValue:String;
+begin
+
+// Just copy one record from A clientdataset to the table
+// Write in file the Serial Number of the key of the record fails . Key is parameter
+// Write in file only if required. For example, mawbs are duplicate - same for many invoices
+// Tables must be open
+
+  If (not SourceDataset.Active) Then raise exception.create('source detaset is closed');
+  If (not DestDataset.Active) Then raise exception.create('Dest detaset is closed');
+
+   DestDataset.Insert;
+   For I := 0 to DestDataset.Fields.count-1 do
+   begin
+      DestField:=DestDataset.Fields[i];
+      DestFieldName:=DestDataset.Fields[i].FieldName;
+      SourceField:=SourceDataset.FindField(DestFieldName);
+      If SourceField <> nil then begin
+         If UpperCase(SourceField.FieldName)= UpperCase(KeyName) then begin
+            KeyValue:= SourceField.asString;
+         end;
+         DestField.value:=SourceField.value;
+      end;
+   end; // for
+//   ShowMessage(DestDataset.Name);
+//   DestDataset.Post;
+
+
+
+   Try
+      DestDataset.Post;
+      Result:=True;
+   except on E: Exception do begin
+      Result:=False;
+      DestDataset.Cancel;
+      If IsLogError then begin
+         Memo1.Lines.Add('Serial Number: '+KeyValue+' .Failed to insert Record in Table '+DestDataset.Name);
+         Memo1.Lines.Add('Database error:'+E.message);
+      end;
+   end;
+   end;
+
+
+End;
+
+}
+
+
+Function TM_MainFRM.CopyDataset(Const sourceTable :string ; DestTable:String);
+Var
+   Count:Integer;
+begin
+
+
+Count:=0;
+
+SourceDataset.First;
+While (not  SourceDataset.Eof) do begin
+   InsertDatasetRecord(SourceDataset,DestDataset,KeyName,IsLogError);
+   Inc(Count);
+   SourceDataset.Next;
+end;
+Result:=Count;
+
+End;
+
+
+
+end.
