@@ -47,11 +47,13 @@ type
     RzLabel2: TRzLabel;
     wwDBRichEdit1: TwwDBRichEdit;
     Button1: TButton;
+    Button2: TButton;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
     procedure FormActivate(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
     cn:TIBCConnection;
@@ -59,6 +61,9 @@ type
   Function InsertDatasetRecord(SourceDataset,DestDataset:TIBCQuery):Boolean;
   Function MakeSQLInsertString(Table:TIBCquery):String;
   procedure GetTableNames;
+  Procedure CopyTariffs;
+  Procedure InsertTariffLine(tariffCode:String);
+  Function GenLineSerial:Integer;
 
   procedure ConnectToDatabase(dbConnection :TIBCConnection;FileName:String);
   public
@@ -107,8 +112,9 @@ var
 begin
  SourceArray   :=[
 'COUNTRY',
-'VAT_CATEGORY',
+//'VAT_CATEGORY',
 'EXCISE_CATEGORY',
+'TARIFF_CERTIFICATE',
 //'DUTY_TYPE',
 'EXCHANGE_RATE',
 'CURRENCY',
@@ -148,6 +154,11 @@ begin
 end;
 
 
+
+procedure TM_MainFRM.Button2Click(Sender: TObject);
+begin
+ CopyTariffs;
+end;
 
 procedure TM_MainFRM.ConnectToDatabase(dbConnection :TIBCConnection;FileName:string);
 Var
@@ -191,8 +202,6 @@ begin
 
 End;
 
-
-
 Function TM_MainFRM.InsertDatasetRecord(SourceDataset,DestDataset:TIBCQuery):Boolean;
 Var
    SourceField,DestField:TField;
@@ -228,9 +237,6 @@ begin
 
 
 End;
-
-
-
 
 Function TM_MainFRM.CopyDataset(Const sourceTable :string ; DestTable:String):integer;
 Var
@@ -276,8 +282,6 @@ Result:=Count;
 
 End;
 
-
-
 procedure TM_MainFRM.FormActivate(Sender: TObject);
 begin
 GetTableNames;
@@ -321,7 +325,6 @@ begin
 
 end;
 
-
 procedure TM_MainFRM.TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
 var
 tablename:String;
@@ -329,13 +332,130 @@ begin
 
  tableName:=sender.Value;
 
-if tableName>'' then begin
-  TableSQL.Close;
-  TableSQL.TableName:=tablename;
-  TableSQL.Open;
-  RecView.Caption:=  tableName;
-  RecView.Execute;
+  if tableName>'' then begin
+    TableSQL.Close;
+    TableSQL.TableName:=tablename;
+    TableSQL.Open;
+    RecView.Caption:=  tableName;
+    RecView.Execute;
+  end;
 end;
+
+Procedure TM_MainFRM.CopyTariffs;
+Var
+   SourceField,DestField:TField;
+   DestFieldName:String;
+   I:Integer;
+   Fname:String;
+   TariffCode:String;
+   TarSQL:TksQuery;
+   DestSQL:TksQuery;
+begin
+  TarSQL:= TksQuery.Create(oldDB,'select * from Tariff WHERE CODE STARTING WITH :TAR');
+  TarSQL.ParamByName('tar').Value:= '1515  90 39';
+  DestSQL:= TksQuery.Create(NewDB,'select * from S_Tariff');
+  try
+    DestSQL.Open;
+    TarSQL.Open;
+    while not TarSQL.Eof do begin
+      DESTsql.Insert;
+      TariffCode:=TarSQL.FieldByName('code').AsString;
+
+      DestSQL.FieldByName('Tariff_code').Value:=TariffCode;
+      DestSQL.FieldByName('fk_Tariff_Usage').Value:='TRF';
+      DestSQL.FieldByName('FK_VAT_code').Value:='V01';
+      DestSQL.FieldByName('DESCRIPTION').Value:=TarSQL.FieldByName('User_keyword').AsString;
+      DestSQL.FieldByName('DESCRIPTION_greek').Value:='';
+      DestSQL.FieldByName('ACTIVE').Value:='Y';
+      DestSQL.FieldByName('user_kEYWORD').Value:=TarSQL.FieldByName('user_kEYWORD').AsString;
+      DestSQL.FieldByName('VAT_APPLIES').Value:='Y';
+      dESTsql.Post;
+      InsertTariffLine(TariffCode);
+
+      TarSQL.Next;
+    end;
+  finally
+    TarSQL.Free;
+  end;
 end;
+
+
+
+Procedure TM_MainFRM.InsertTariffLine(tariffCode:String);
+var
+  tarSQL:TksQuery;
+  ImpLineSQL:TksQuery;
+  ExcLineSQL:TksQuery;
+  Linestr:string;
+begin
+
+  lineStr:= 'SELECT a.FK_S_TARIFF_CODE, a.SERIAL_NUMBER, a.DUTY_TYPE, a.FK_BASE, a.DESCRIPTION, a.TARIFF_UNIT, a.TARIFF_UNIT_INCREMENT, a.TARIFF_UNIT_RATE, a.CAN_BE_RELIEVED, a.CHARGING_METHOD, a.UNITS_NOT_CHARGED, a.MIN_CHARGE, a.MAX_CHARGE, a.XML_CODE'
+  +' FROM S_TARIFF_LINE a where a.FK_S_Tariff_code = ''-1'' ';
+
+
+ TarSQL:= TksQuery.Create(oldDB,'select * from Tariff WHERE Code= :tariffCode');
+ ImplineSQL:= TksQuery.Create(NewDB,LineStr);
+ ExclineSQL:= TksQuery.Create(NewDB,LineStr);
+
+ try
+    TarSQL.paramByName('tariffCode').Value:= TariffCode;
+    TarSQL.Open;
+    ImplineSQL.Open;
+    ExclineSQL.Open;
+    if TarSQL.IsEmpty then
+      exit;
+    try
+      ImplineSQL.Insert;
+      ImplineSQL.FieldByName('SERIAL_NUMBER').Value:= GenLineSerial;
+      ImplineSQL.FieldByName('fk_s_tariff_code').Value:= TariffCode;
+      ImplineSQL.FieldByName('DUTY_TYPE').Value:='IMP';
+      ImplineSQL.FieldByName('description').Value:='Default Import Duty';
+      ImplineSQL.FieldByName('TARIFF_UNIT_RATE').Value:=tarSQL.FieldByName('GENERAL_DUTY_RATE').AsFloat;
+      ImplineSQL.FieldByName('CAN_BE_RELIEVED').Value:='Y';
+      ImplineSQL.FieldByName('CHARGING_METHOD').Value:='VA';
+      ImplineSQL.Post;
+    except
+      ImplineSQL.Cancel;
+    end;
+
+    try
+      ExclineSQL.Insert;
+      ExclineSQL.FieldByName('SERIAL_NUMBER').Value:= GenLineSerial;
+      ExclineSQL.FieldByName('fk_s_tariff_code').Value:= TariffCode;
+      ExclineSQL.FieldByName('DUTY_TYPE').Value:='EXC';
+      ExclineSQL.FieldByName('description').Value:='Zero Excise';
+      ExclineSQL.FieldByName('TARIFF_UNIT_RATE').Value:=0;
+      ExclineSQL.FieldByName('CAN_BE_RELIEVED').Value:='Y';
+      ExclineSQL.FieldByName('CHARGING_METHOD').Value:='VA';
+      ExclineSQL.Post;
+    except
+      ExclineSQL.Cancel;
+    end;
+
+ finally
+    TarSQL.Free;
+    ImplineSQL.Free;
+    ExclineSQL.Free;
+ end;
+
+End;
+
+
+
+Function TM_MainFRM.GenLineSerial:Integer;
+var
+ genSQL:TksQuery;
+begin
+ result:=0;
+ genSQL:=TksQuery.Create(newDb,'SELECT NEXT VALUE FOR GEN_S_TARIFF_LINE FROM RDB$DATABASE');
+ try
+  GenSQL.Open;
+  result:=genSQL.FieldByName('GEN_ID').AsInteger;
+ finally
+  GenSQL.Free;
+ end;
+
+end;
+
 
 end.
