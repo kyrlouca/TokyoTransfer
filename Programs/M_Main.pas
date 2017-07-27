@@ -8,12 +8,12 @@ uses
   Vcl.Grids, vcl.wwdbigrd, vcl.wwdbgrid, MemDS, Vcl.Buttons, Datasnap.Provider,
   Datasnap.DBClient, vcl.wwclient, VirtualTable, Vcl.DBCtrls, vcl.wwspeedbutton,
   vcl.wwdbnavigator, Vcl.ExtCtrls, vcl.wwclearpanel, vcl.wwDialog, vcl.Wwrcdvw,
-  Vcl.Mask, vcl.Wwdbedit, vcl.Wwdotdot, vcl.Wwdbcomb, vcl.wwlocate;
+  Vcl.Mask, vcl.Wwdbedit, vcl.Wwdotdot, vcl.Wwdbcomb, vcl.wwlocate, RzLabel,
+  Vcl.ComCtrls, vcl.wwriched;
 
 type
 
   TM_MainFRM = class(TForm)
-    Button1: TButton;
     OldDb: TIBCConnection;
     NewDB: TIBCConnection;
     OldRead: TIBCTransaction;
@@ -40,10 +40,18 @@ type
     loc1: TwwLocateDialog;
     wwDBNavigator1FilterDialog: TwwNavButton;
     wwDBNavigator1LocateDialog: TwwNavButton;
+    Panel1: TPanel;
+    Label1: TLabel;
+    Panel2: TPanel;
+    BitBtn1: TBitBtn;
+    RzLabel2: TRzLabel;
+    wwDBRichEdit1: TwwDBRichEdit;
+    Button1: TButton;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
     procedure FormActivate(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
   private
     { Private declarations }
     cn:TIBCConnection;
@@ -85,6 +93,11 @@ TableFLD.Items.Clear;
 
 end;
 
+procedure TM_MainFRM.BitBtn1Click(Sender: TObject);
+begin
+close;
+end;
+
 procedure TM_MainFRM.Button1Click(Sender: TObject);
 var
 
@@ -119,14 +132,18 @@ begin
 
   ConnectToDatabase(OldDB,'DatabaseParamsOld.txt');
   ConnectToDatabase(NewDB,'DatabaseParamsNew.txt');
-//  t1SQL.Close;
-//  t1SQL.Open;
+
+ ksExecSQL(cn,'delete from CLEARANCE_WAITING_CODE',[]);
+
   for i:=0 to Length(SourceArray)-1 do begin
 //   CopyDataset('clearance_waiting_code','clearance_waiting_code');
    CopyDataset(SourceArray[i],SourceArray[i]);
   end;
+
   ksExecSQL(cn,'update CLEARANCE_WAITING_CODE set code= Code_4',[]);
   ksExecSQL(cn,'update CUSTOMER set  ADDRESS_POST_CODE=aDDRESS2, ADDRESS_CITY=ADDRESS3, ADDRESS_COUNTRY=''CYPRUS'' ',[]);
+
+  ShowMessage('finished');
   //customers
 end;
 
