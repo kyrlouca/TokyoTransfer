@@ -2,7 +2,7 @@ object M_MainFRM: TM_MainFRM
   Left = 0
   Top = 0
   Caption = 'M_MainFRM'
-  ClientHeight = 375
+  ClientHeight = 437
   ClientWidth = 1022
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -11,34 +11,30 @@ object M_MainFRM: TM_MainFRM
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  OnActivate = FormActivate
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Button1: TButton
-    Left = 147
-    Top = 120
+    Left = 555
+    Top = 56
     Width = 75
     Height = 25
-    Caption = 'Button1'
+    Caption = 'Update'
     TabOrder = 0
     OnClick = Button1Click
   end
   object wwDBGrid1: TwwDBGrid
     Left = 32
-    Top = 208
-    Width = 337
+    Top = 272
+    Width = 609
     Height = 120
-    Selected.Strings = (
-      'CODE'#9'4'#9'CODE'
-      'DESCRIPTION'#9'27'#9'DESCRIPTION'
-      'CODE_4'#9'6'#9'CODE_4'
-      'DEFAULT_FOR_MEDIUM_VALUE'#9'25'#9'DEFAULT_FOR_MEDIUM_VALUE')
     IniAttributes.Delimiter = ';;'
     IniAttributes.UnicodeIniFile = False
     TitleColor = clBtnFace
     FixedCols = 0
     ShowHorzScrollBar = True
-    DataSource = t1SRC
+    DataSource = TableSRC
     TabOrder = 1
     TitleAlignment = taLeftJustify
     TitleFont.Charset = DEFAULT_CHARSET
@@ -49,59 +45,16 @@ object M_MainFRM: TM_MainFRM
     TitleLines = 1
     TitleButtons = False
   end
-  object BitBtn1: TBitBtn
-    Left = 544
-    Top = 24
-    Width = 75
-    Height = 25
-    Caption = 'BitBtn1'
-    TabOrder = 2
-    OnClick = BitBtn1Click
-  end
   object wwDBNavigator1: TwwDBNavigator
     Left = 32
     Top = 169
-    Width = 350
+    Width = 250
     Height = 25
-    DataSource = t1SRC
+    DataSource = TableSRC
     RepeatInterval.InitialDelay = 500
     RepeatInterval.Interval = 100
-    object wwDBNavigator1First: TwwNavButton
-      Left = 0
-      Top = 0
-      Width = 25
-      Height = 25
-      Hint = 'Move to first record'
-      ImageIndex = -1
-      NumGlyphs = 2
-      Spacing = 4
-      Transparent = False
-      Caption = 'wwDBNavigator1First'
-      Enabled = False
-      DisabledTextColors.ShadeColor = clGray
-      DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 0
-      Style = nbsFirst
-    end
-    object wwDBNavigator1PriorPage: TwwNavButton
-      Left = 25
-      Top = 0
-      Width = 25
-      Height = 25
-      Hint = 'Move backward 10 records'
-      ImageIndex = -1
-      NumGlyphs = 2
-      Spacing = 4
-      Transparent = False
-      Caption = 'wwDBNavigator1PriorPage'
-      Enabled = False
-      DisabledTextColors.ShadeColor = clGray
-      DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 1
-      Style = nbsPriorPage
-    end
     object wwDBNavigator1Prior: TwwNavButton
-      Left = 50
+      Left = 0
       Top = 0
       Width = 25
       Height = 25
@@ -114,11 +67,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 2
+      Index = 0
       Style = nbsPrior
     end
     object wwDBNavigator1Next: TwwNavButton
-      Left = 75
+      Left = 25
       Top = 0
       Width = 25
       Height = 25
@@ -131,45 +84,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 3
+      Index = 1
       Style = nbsNext
     end
-    object wwDBNavigator1NextPage: TwwNavButton
-      Left = 100
-      Top = 0
-      Width = 25
-      Height = 25
-      Hint = 'Move forward 10 records'
-      ImageIndex = -1
-      NumGlyphs = 2
-      Spacing = 4
-      Transparent = False
-      Caption = 'wwDBNavigator1NextPage'
-      Enabled = False
-      DisabledTextColors.ShadeColor = clGray
-      DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 4
-      Style = nbsNextPage
-    end
-    object wwDBNavigator1Last: TwwNavButton
-      Left = 125
-      Top = 0
-      Width = 25
-      Height = 25
-      Hint = 'Move to last record'
-      ImageIndex = -1
-      NumGlyphs = 2
-      Spacing = 4
-      Transparent = False
-      Caption = 'wwDBNavigator1Last'
-      Enabled = False
-      DisabledTextColors.ShadeColor = clGray
-      DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 5
-      Style = nbsLast
-    end
     object wwDBNavigator1Insert: TwwNavButton
-      Left = 150
+      Left = 50
       Top = 0
       Width = 25
       Height = 25
@@ -182,11 +101,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 6
+      Index = 2
       Style = nbsInsert
     end
     object wwDBNavigator1Delete: TwwNavButton
-      Left = 175
+      Left = 75
       Top = 0
       Width = 25
       Height = 25
@@ -199,11 +118,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 7
+      Index = 3
       Style = nbsDelete
     end
     object wwDBNavigator1Edit: TwwNavButton
-      Left = 200
+      Left = 100
       Top = 0
       Width = 25
       Height = 25
@@ -216,11 +135,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 8
+      Index = 4
       Style = nbsEdit
     end
     object wwDBNavigator1Post: TwwNavButton
-      Left = 225
+      Left = 125
       Top = 0
       Width = 25
       Height = 25
@@ -233,11 +152,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 9
+      Index = 5
       Style = nbsPost
     end
     object wwDBNavigator1Cancel: TwwNavButton
-      Left = 250
+      Left = 150
       Top = 0
       Width = 25
       Height = 25
@@ -250,11 +169,11 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 10
+      Index = 6
       Style = nbsCancel
     end
     object wwDBNavigator1Refresh: TwwNavButton
-      Left = 275
+      Left = 175
       Top = 0
       Width = 25
       Height = 25
@@ -267,52 +186,59 @@ object M_MainFRM: TM_MainFRM
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 11
+      Index = 7
       Style = nbsRefresh
     end
-    object wwDBNavigator1SaveBookmark: TwwNavButton
-      Left = 300
+    object wwDBNavigator1FilterDialog: TwwNavButton
+      Left = 200
       Top = 0
       Width = 25
       Height = 25
-      Hint = 'Bookmark current record'
+      Hint = 'Filter the dataset'
       ImageIndex = -1
       NumGlyphs = 2
       Spacing = 4
       Transparent = False
-      Caption = 'wwDBNavigator1SaveBookmark'
+      Caption = 'wwDBNavigator1FilterDialog'
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 12
-      Style = nbsSaveBookmark
+      Index = 8
+      Style = nbsFilterDialog
     end
-    object wwDBNavigator1RestoreBookmark: TwwNavButton
-      Left = 325
+    object wwDBNavigator1LocateDialog: TwwNavButton
+      Left = 225
       Top = 0
       Width = 25
       Height = 25
-      Hint = 'Go back to saved bookmark'
+      Hint = 'Locate a specific record'
       ImageIndex = -1
       NumGlyphs = 2
       Spacing = 4
       Transparent = False
-      Caption = 'wwDBNavigator1RestoreBookmark'
+      Caption = 'wwDBNavigator1LocateDialog'
       Enabled = False
       DisabledTextColors.ShadeColor = clGray
       DisabledTextColors.HighlightColor = clBtnHighlight
-      Index = 13
-      Style = nbsRestoreBookmark
+      Index = 9
+      Style = nbsLocateDialog
     end
   end
-  object Memo1: TMemo
-    Left = 456
-    Top = 122
-    Width = 361
-    Height = 249
-    Lines.Strings = (
-      'Memo1')
-    TabOrder = 4
+  object TableFLD: TwwDBComboBox
+    Left = 32
+    Top = 245
+    Width = 121
+    Height = 21
+    ShowButton = True
+    Style = csDropDown
+    MapList = False
+    AllowClearKey = False
+    DropDownCount = 8
+    ItemHeight = 0
+    Sorted = False
+    TabOrder = 3
+    UnboundDataType = wwDefault
+    OnCloseUp = TableFLDCloseUp
   end
   object OldDb: TIBCConnection
     Database = 'C:\Data\DelphiProjects\Databases\TokyoTransfer\CABDB.FDB'
@@ -341,7 +267,7 @@ object M_MainFRM: TM_MainFRM
     Connected = True
     LoginPrompt = False
     Debug = True
-    Left = 152
+    Left = 120
     Top = 32
     EncryptedPassword = '92FF9EFF8CFF8BFF9AFF8DFF94FF9AFF86FF'
   end
@@ -367,18 +293,18 @@ object M_MainFRM: TM_MainFRM
     Left = 200
     Top = 328
   end
-  object t1SRC: TIBCDataSource
-    DataSet = destSQL
-    Left = 88
-    Top = 104
+  object TableSRC: TIBCDataSource
+    DataSet = TableSQL
+    Left = 216
+    Top = 224
   end
   object sourceSQL: TIBCQuery
     LocalUpdate = True
     Connection = OldDb
     Transaction = OldRead
     UpdateTransaction = OldWrite
-    Left = 336
-    Top = 144
+    Left = 200
+    Top = 32
   end
   object destSQL: TIBCQuery
     SQLDelete.Strings = (
@@ -390,7 +316,57 @@ object M_MainFRM: TM_MainFRM
     Connection = NewDB
     Transaction = NewRead
     UpdateTransaction = NewWrite
-    Left = 496
-    Top = 24
+    Left = 264
+    Top = 32
+  end
+  object RecView: TwwRecordViewDialog
+    DataSource = TableSRC
+    FormPosition.Left = 0
+    FormPosition.Top = 0
+    FormPosition.Width = 0
+    FormPosition.Height = 0
+    NavigatorButtons = [nbsFirst, nbsPrior, nbsNext, nbsLast, nbsInsert, nbsDelete, nbsEdit, nbsPost, nbsCancel, nbsRefresh, nbsLocateDialog]
+    ControlOptions = []
+    LabelFont.Charset = DEFAULT_CHARSET
+    LabelFont.Color = clWindowText
+    LabelFont.Height = -11
+    LabelFont.Name = 'Tahoma'
+    LabelFont.Style = []
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Caption = 'Record View'
+    NavigatorFlat = True
+    Navigator = wwDBNavigator1
+    Left = 56
+    Top = 112
+  end
+  object MetaSQL: TIBCMetaData
+    Active = True
+    MetaDataKind = 'Tables'
+    Connection = NewDB
+    Left = 392
+    Top = 88
+  end
+  object TableSQL: TIBCTable
+    Connection = NewDB
+    Transaction = NewRead
+    UpdateTransaction = NewWrite
+    Left = 288
+    Top = 224
+  end
+  object loc1: TwwLocateDialog
+    Caption = 'Locate Field Value'
+    DataSource = TableSRC
+    MatchType = mtPartialMatchStart
+    CaseSensitive = False
+    SortFields = fsSortByFieldName
+    DefaultButton = dbFindNext
+    FieldSelection = fsAllFields
+    ShowMessages = True
+    Left = 544
+    Top = 176
   end
 end

@@ -7,9 +7,11 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Data.DB, DBAccess, IBC,
   Vcl.Grids, vcl.wwdbigrd, vcl.wwdbgrid, MemDS, Vcl.Buttons, Datasnap.Provider,
   Datasnap.DBClient, vcl.wwclient, VirtualTable, Vcl.DBCtrls, vcl.wwspeedbutton,
-  vcl.wwdbnavigator, Vcl.ExtCtrls, vcl.wwclearpanel;
+  vcl.wwdbnavigator, Vcl.ExtCtrls, vcl.wwclearpanel, vcl.wwDialog, vcl.Wwrcdvw,
+  Vcl.Mask, vcl.Wwdbedit, vcl.Wwdotdot, vcl.Wwdbcomb, vcl.wwlocate;
 
 type
+
   TM_MainFRM = class(TForm)
     Button1: TButton;
     OldDb: TIBCConnection;
@@ -18,36 +20,37 @@ type
     OldWrite: TIBCTransaction;
     NewRead: TIBCTransaction;
     NewWrite: TIBCTransaction;
-    t1SRC: TIBCDataSource;
+    TableSRC: TIBCDataSource;
     wwDBGrid1: TwwDBGrid;
-    BitBtn1: TBitBtn;
     sourceSQL: TIBCQuery;
     wwDBNavigator1: TwwDBNavigator;
-    wwDBNavigator1First: TwwNavButton;
-    wwDBNavigator1PriorPage: TwwNavButton;
     wwDBNavigator1Prior: TwwNavButton;
     wwDBNavigator1Next: TwwNavButton;
-    wwDBNavigator1NextPage: TwwNavButton;
-    wwDBNavigator1Last: TwwNavButton;
     wwDBNavigator1Insert: TwwNavButton;
     wwDBNavigator1Delete: TwwNavButton;
     wwDBNavigator1Edit: TwwNavButton;
     wwDBNavigator1Post: TwwNavButton;
     wwDBNavigator1Cancel: TwwNavButton;
     wwDBNavigator1Refresh: TwwNavButton;
-    wwDBNavigator1SaveBookmark: TwwNavButton;
-    wwDBNavigator1RestoreBookmark: TwwNavButton;
-    Memo1: TMemo;
     destSQL: TIBCQuery;
+    RecView: TwwRecordViewDialog;
+    MetaSQL: TIBCMetaData;
+    TableFLD: TwwDBComboBox;
+    TableSQL: TIBCTable;
+    loc1: TwwLocateDialog;
+    wwDBNavigator1FilterDialog: TwwNavButton;
+    wwDBNavigator1LocateDialog: TwwNavButton;
     procedure Button1Click(Sender: TObject);
-    procedure BitBtn1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
+    procedure FormActivate(Sender: TObject);
   private
     { Private declarations }
     cn:TIBCConnection;
   Function CopyDataset(Const sourceTable :string ; DestTable:String):integer;
   Function InsertDatasetRecord(SourceDataset,DestDataset:TIBCQuery):Boolean;
   Function MakeSQLInsertString(Table:TIBCquery):String;
+  procedure GetTableNames;
 
   procedure ConnectToDatabase(dbConnection :TIBCConnection;FileName:String);
   public
@@ -63,32 +66,68 @@ implementation
 
 uses G_KyrSQL;
 
-procedure TM_MainFRM.BitBtn1Click(Sender: TObject);
+procedure TM_MainFRM.GetTableNames;
 begin
-//DestSQL.Close;
-//DestSQL.Close;
-//DestSQL.Open;
-destSQl.Close;
-destSQl.Open;
+MetaSQL.Close;
+TableFLD.Clear;
+TableFLD.Items.Clear;
+
+//memo1.Clear;
+//    MetaSQL.MetaDataKind := 'IndexColumns';
+//    MetaSQL.Restrictions.Values['INDEX_NAME'] := ts;
+    MetaSQL.MetaDataKind := 'Tables';
+    MetaSQL.Open;
+    while not MetaSQL.Eof do begin
+      tableFLD.Items.Add(MetaSQL.FieldByName('TABLE_NAME').AsString);
+//      Memo1.Lines.Add(MetaSQL.FieldByName('TABLE_NAME').AsString);
+      MetaSQL.Next;
+    end;
 
 end;
 
 procedure TM_MainFRM.Button1Click(Sender: TObject);
 var
-  TableArray: Array of String;
-  t:String;
+
+  SourceArray: Array of String;
+  DestArray : Array of String;
+  i:Integer;
 begin
-TableArray:=['clearance_waiting_code','district'];
+ SourceArray   :=[
+'COUNTRY',
+'VAT_CATEGORY',
+'EXCISE_CATEGORY',
+//'DUTY_TYPE',
+'EXCHANGE_RATE',
+'CURRENCY',
+'DELIVERY_TERM',
+'FLIGHT_NUMBERS',
+'PORT',
+'CLEARANCE_WAITING_CODE',
+'IMPORT_TYPE',
+'GENERAL_PARAMETER',
+'DISTRICT',
+'SYSTEM_PARAMETERS',
+'EMAIL_MESSAGE',
+'SECURITY_SCREEN',
+'SECURITY_USER',
+'SECURITY_USER_SCREEN',
+//'CUSTOMER',
+'USER_STATION'
+
+];
+
 
   ConnectToDatabase(OldDB,'DatabaseParamsOld.txt');
   ConnectToDatabase(NewDB,'DatabaseParamsNew.txt');
 //  t1SQL.Close;
 //  t1SQL.Open;
-  for t in TableArray do begin
+  for i:=0 to Length(SourceArray)-1 do begin
 //   CopyDataset('clearance_waiting_code','clearance_waiting_code');
-   CopyDataset(t,t);
-
+   CopyDataset(SourceArray[i],SourceArray[i]);
   end;
+  ksExecSQL(cn,'update CLEARANCE_WAITING_CODE set code= Code_4',[]);
+  ksExecSQL(cn,'update CUSTOMER set  ADDRESS_POST_CODE=aDDRESS2, ADDRESS_CITY=ADDRESS3, ADDRESS_COUNTRY=''CYPRUS'' ',[]);
+  //customers
 end;
 
 
@@ -162,9 +201,11 @@ begin
       end;
 
    end; // for
+
    try
      DestDataset.Post;
    Except
+    DestDataset.Cancel;
     //do nothing
    end;
 
@@ -184,29 +225,30 @@ sourceSQL.Close;
 //sourceSQL.ClearFields;
 sourceSQL.SQL.Clear;
 sourceSQL.SQL.Add('select * from ' + sourceTable);
-sourceSQL.Open;
 
 DestSQL.Close;
 DestSQL.SQL.Clear;
 DestSQL.SQL.Add('select * from '+DestTable);
 DestSQL.UpdatingTable:=DestTable;
-DestSQL.Open;
+
+try
+  sourceSQL.Open;
+  DestSQL.Open;
+
+except
+  ShowMessage('cannot open source or dest table: '+ sourceTable);
+  sourceSQL.Close;
+  destSQL.Close;
+  exit;
+end;
+
 
 DestSQL.SQLInsert.Clear;
 str:=MakeSQLInsertString(DestSQL);
-memo1.Lines.Add(str);
+//memo1.Lines.Add(str);
 DestSQL.SQLInsert.Add(str);
 
-{
-destSQL.SQLInsert.Clear;
-destSQL.SQLInsert.Add('INSERT INTO CLEARANCE_WAITING_CODE '
-+'  (CODE, DESCRIPTION, CODE_4, DEFAULT_FOR_MEDIUM_VALUE)'
-+'   VALUES'
-+'  (:CODE, :DESCRIPTION, :CODE_4, :DEFAULT_FOR_MEDIUM_VALUE)');
-ShowMessage(destSQL.SQLInsert.Text);
-}
 Count:=0;
-
 While (not  sourceSQL.Eof) do begin
 //   showMessage(sourceSQL.Fields[0].AsString);
    InsertDatasetRecord(SourceSQL,DestSQL);
@@ -218,6 +260,11 @@ Result:=Count;
 End;
 
 
+
+procedure TM_MainFRM.FormActivate(Sender: TObject);
+begin
+GetTableNames;
+end;
 
 procedure TM_MainFRM.FormCreate(Sender: TObject);
 begin
@@ -255,9 +302,23 @@ begin
   end;
 
 
-
-
 end;
 
+
+procedure TM_MainFRM.TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
+var
+tablename:String;
+begin
+
+ tableName:=sender.Value;
+
+if tableName>'' then begin
+  TableSQL.Close;
+  TableSQL.TableName:=tablename;
+  TableSQL.Open;
+  RecView.Caption:=  tableName;
+  RecView.Execute;
+end;
+end;
 
 end.
