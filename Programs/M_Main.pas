@@ -48,6 +48,7 @@ type
     wwDBRichEdit1: TwwDBRichEdit;
     Button1: TButton;
     Button2: TButton;
+    Button3: TButton;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
@@ -158,6 +159,7 @@ end;
 procedure TM_MainFRM.Button2Click(Sender: TObject);
 begin
  CopyTariffs;
+ ShowMessage('tariffs updated');
 end;
 
 procedure TM_MainFRM.ConnectToDatabase(dbConnection :TIBCConnection;FileName:string);
@@ -351,25 +353,34 @@ Var
    TarSQL:TksQuery;
    DestSQL:TksQuery;
 begin
-  TarSQL:= TksQuery.Create(oldDB,'select * from Tariff WHERE CODE STARTING WITH :TAR');
-  TarSQL.ParamByName('tar').Value:= '1515  90 39';
+//  TarSQL:= TksQuery.Create(oldDB,'select * from Tariff WHERE CODE STARTING WITH :TAR'); //for testing
+//  TarSQL.ParamByName('tar').Value:= '1515  90 39';
+  TarSQL:= TksQuery.Create(oldDB,'select * from Tariff');
   DestSQL:= TksQuery.Create(NewDB,'select * from S_Tariff');
   try
     DestSQL.Open;
     TarSQL.Open;
     while not TarSQL.Eof do begin
-      DESTsql.Insert;
-      TariffCode:=TarSQL.FieldByName('code').AsString;
+      try
 
-      DestSQL.FieldByName('Tariff_code').Value:=TariffCode;
-      DestSQL.FieldByName('fk_Tariff_Usage').Value:='TRF';
-      DestSQL.FieldByName('FK_VAT_code').Value:='V01';
-      DestSQL.FieldByName('DESCRIPTION').Value:=TarSQL.FieldByName('User_keyword').AsString;
-      DestSQL.FieldByName('DESCRIPTION_greek').Value:='';
-      DestSQL.FieldByName('ACTIVE').Value:='Y';
-      DestSQL.FieldByName('user_kEYWORD').Value:=TarSQL.FieldByName('user_kEYWORD').AsString;
-      DestSQL.FieldByName('VAT_APPLIES').Value:='Y';
-      dESTsql.Post;
+
+        DESTsql.Insert;
+        TariffCode:=TarSQL.FieldByName('code').AsString;
+
+        DestSQL.FieldByName('Tariff_code').Value:=TariffCode;
+        DestSQL.FieldByName('fk_Tariff_Usage').Value:='TRF';
+        DestSQL.FieldByName('FK_VAT_code').Value:='V01';
+        DestSQL.FieldByName('DESCRIPTION').Value:=TarSQL.FieldByName('User_keyword').AsString;
+        DestSQL.FieldByName('DESCRIPTION_greek').Value:='';
+        DestSQL.FieldByName('ACTIVE').Value:='Y';
+        DestSQL.FieldByName('user_kEYWORD').Value:=TarSQL.FieldByName('user_kEYWORD').AsString;
+        DestSQL.FieldByName('VAT_APPLIES').Value:='Y';
+        dESTsql.Post;
+      except
+        destSQL.Cancel;
+        tarSQL.Next;
+        continue;
+      end;
       InsertTariffLine(TariffCode);
 
       TarSQL.Next;
