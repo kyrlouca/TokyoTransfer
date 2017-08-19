@@ -1,0 +1,2 @@
+localhost
+C:\Data\DelphiProjects\Databases\TokyoTransfer\TOKYOTARIFFDB.FDB

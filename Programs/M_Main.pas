@@ -9,7 +9,7 @@ uses
   Datasnap.DBClient, vcl.wwclient, VirtualTable, Vcl.DBCtrls, vcl.wwspeedbutton,
   vcl.wwdbnavigator, Vcl.ExtCtrls, vcl.wwclearpanel, vcl.wwDialog, vcl.Wwrcdvw,
   Vcl.Mask, vcl.Wwdbedit, vcl.Wwdotdot, vcl.Wwdbcomb, vcl.wwlocate, RzLabel,
-  Vcl.ComCtrls, vcl.wwriched;
+  Vcl.ComCtrls, vcl.wwriched, vcl.wwbutton, RzEdit;
 
 type
 
@@ -45,19 +45,25 @@ type
     Panel2: TPanel;
     BitBtn1: TBitBtn;
     RzLabel2: TRzLabel;
-    wwDBRichEdit1: TwwDBRichEdit;
+    Inititial: TwwDBRichEdit;
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
+    Button4: TButton;
+    RzMemo1: TRzMemo;
+    wwButton1: TwwButton;
+    DaysFLD: TwwDBEdit;
+    RzLabel1: TRzLabel;
     procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure TableFLDCloseUp(Sender: TwwDBComboBox; Select: Boolean);
     procedure FormActivate(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
+    procedure wwButton1Click(Sender: TObject);
   private
     { Private declarations }
-    cn:TIBCConnection;
+    cnNew,cnOld:TIBCConnection;
   Function CopyDataset(Const sourceTable :string ; DestTable:String):integer;
   Function InsertDatasetRecord(SourceDataset,DestDataset:TIBCQuery):Boolean;
   Function MakeSQLInsertString(Table:TIBCquery):String;
@@ -107,15 +113,16 @@ end;
 procedure TM_MainFRM.Button1Click(Sender: TObject);
 var
 
-  SourceArray: Array of String;
+  SourceArray, SS: Array of String;
   DestArray : Array of String;
   i:Integer;
 begin
- SourceArray   :=[
+SOURCEaRRAY:=['customer'];
+ SS   :=[
 'COUNTRY',
 //'VAT_CATEGORY',
 'EXCISE_CATEGORY',
-'TARIFF_CERTIFICATE',
+//'TARIFF_CERTIFICATE',
 //'DUTY_TYPE',
 'EXCHANGE_RATE',
 'CURRENCY',
@@ -124,6 +131,7 @@ begin
 'PORT',
 'CLEARANCE_WAITING_CODE',
 'IMPORT_TYPE',
+//'CUSTOMS_HAWB_TYPE',
 'GENERAL_PARAMETER',
 'DISTRICT',
 'SYSTEM_PARAMETERS',
@@ -140,15 +148,15 @@ begin
   ConnectToDatabase(OldDB,'DatabaseParamsOld.txt');
   ConnectToDatabase(NewDB,'DatabaseParamsNew.txt');
 
- ksExecSQL(cn,'delete from CLEARANCE_WAITING_CODE',[]);
+ ksExecSQL(cnNew,'delete from CLEARANCE_WAITING_CODE',[]);
 
   for i:=0 to Length(SourceArray)-1 do begin
 //   CopyDataset('clearance_waiting_code','clearance_waiting_code');
    CopyDataset(SourceArray[i],SourceArray[i]);
   end;
 
-  ksExecSQL(cn,'update CLEARANCE_WAITING_CODE set code= Code_4',[]);
-  ksExecSQL(cn,'update CUSTOMER set  ADDRESS_POST_CODE=aDDRESS2, ADDRESS_CITY=ADDRESS3, ADDRESS_COUNTRY=''CYPRUS'' ',[]);
+  ksExecSQL(cnNew,'update CLEARANCE_WAITING_CODE set code= Code_4',[]);
+  ksExecSQL(cnNew,'update CUSTOMER set  ADDRESS_POST_CODE=aDDRESS2, ADDRESS_CITY=ADDRESS3, ADDRESS_COUNTRY=''CYPRUS'' ',[]);
 
   ShowMessage('finished');
   //customers
@@ -187,6 +195,9 @@ begin
       FreeAndNil(LStrings);
     end;
 
+        If dbConnection.connected then
+                dbConnection.Disconnect;
+
         dbConnection.Server:=ServerIP;
         dbConnection.database:=DatabasePath;
 
@@ -194,8 +205,6 @@ begin
         FbClientPath:=FBClientPath+'\gds32.dll';
 
         dbConnection.ClientLibrary := FBClientPath;
-        If dbConnection.connected then
-                dbConnection.Disconnect;
 
         dbConnection.Connect;
         if not dbConnection.Connected then
@@ -291,7 +300,10 @@ end;
 
 procedure TM_MainFRM.FormCreate(Sender: TObject);
 begin
-cn:=NewDB;
+  ConnectToDatabase(OldDB,'DatabaseParamsOld.txt');
+  ConnectToDatabase(NewDB,'DatabaseParamsNew.txt');
+cnNew:=NewDB;
+CnOld:=OldDb;
 end;
 
 Function TM_MainFRM.MakeSQLInsertString(Table:TIBCquery):String;
@@ -341,6 +353,78 @@ begin
     RecView.Caption:=  tableName;
     RecView.Execute;
   end;
+end;
+
+procedure TM_MainFRM.wwButton1Click(Sender: TObject);
+var
+  qr:TksQuery;
+  serial:Integer;
+  Name:String;
+  str:string;
+  strCount:String;
+  Days:Integer;
+
+begin
+  Days := StrToIntDef(daysFLD.Text,48);
+  if Days <50 then begin
+    ShowMessage('cannot be less than 50');
+    exit;
+  end;
+
+  StrCount:=
+' select Count(*) as cnt from'
++' (select'
++'     code, cu.name'
++'     ,ha.hab_id , ha.date_invoiced, ha.date_cleared'
++'     ,(''now''-date_cleared ) as daysPassed'
++' from customer cu'
++' left outer join hawb ha on ha.fk_customer_code = cu.code'
++' ) as lol'
++' where  (daysPassed > :days ) or (hab_id is null)';
+
+
+  str:=
+' select code, hab_id, daysPassed from'
++' (select'
++'     code, cu.name'
++'     ,ha.hab_id , ha.date_invoiced, ha.date_cleared'
++'     ,(''now''-date_cleared ) as daysPassed'
++' from customer cu'
++' left outer join hawb ha on ha.fk_customer_code = cu.code'
++' ) as lol'
++' where daysPassed > 50 and (daysPassed > :days ) or (hab_id is null)';
+
+//  showMessage(cnOld.Database);
+  qr:=TksQuery.Create(cnOld,strCount);
+  try
+    qr.ParamByName('Days').Value:=Days;
+    qr.Open;
+    serial:=qr.FieldByName('cnt').asInteger;
+  finally
+    qr.Free;
+  end;
+
+  if MessageDlg(IntToStr(serial)+'  Customers will be Deleted.'+#13+#10+'Proceed?', mtWarning, [ mbNo,mbYes], 0)=mrNo then begin
+    exit;
+  end;
+
+//  SHowMessage('Deleting now');
+
+  qr:=TksQuery.Create(cnOld,str);
+  try
+    qr.ParamByName('Days').Value:=Days;
+    qr.Open;
+    while not qr.Eof do begin
+      serial:=qr.FieldByName('code').AsInteger;
+      name:=qr.FieldByName('Hab_id').AsString;
+//      showMessage(inttoStr(serial)+'--'+name);
+      ksExecSQL(cnNew,'delete from customer where code = :serial',[IntToStr(Serial)]);
+      qr.Next;
+    end;
+  finally
+    qr.Free;
+  end;
+
 end;
 
 Procedure TM_MainFRM.CopyTariffs;

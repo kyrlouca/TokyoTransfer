@@ -2,7 +2,7 @@ object M_MainFRM: TM_MainFRM
   Left = 0
   Top = 0
   Caption = 'M_MainFRM'
-  ClientHeight = 601
+  ClientHeight = 745
   ClientWidth = 1022
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,10 +22,17 @@ object M_MainFRM: TM_MainFRM
     Height = 13
     Caption = 'RzLabel2'
   end
+  object RzLabel1: TRzLabel
+    Left = 16
+    Top = 248
+    Width = 43
+    Height = 13
+    Caption = 'Days Old'
+  end
   object wwDBGrid1: TwwDBGrid
-    Left = 8
-    Top = 432
-    Width = 625
+    Left = 510
+    Top = 216
+    Width = 137
     Height = 120
     IniAttributes.Delimiter = ';;'
     IniAttributes.UnicodeIniFile = False
@@ -42,10 +49,11 @@ object M_MainFRM: TM_MainFRM
     TitleFont.Style = []
     TitleLines = 1
     TitleButtons = False
+    Visible = False
   end
   object wwDBNavigator1: TwwDBNavigator
-    Left = 8
-    Top = 292
+    Left = 0
+    Top = 383
     Width = 250
     Height = 25
     DataSource = TableSRC
@@ -224,8 +232,8 @@ object M_MainFRM: TM_MainFRM
     end
   end
   object TableFLD: TwwDBComboBox
-    Left = 8
-    Top = 405
+    Left = 497
+    Top = 342
     Width = 121
     Height = 21
     ShowButton = True
@@ -237,6 +245,7 @@ object M_MainFRM: TM_MainFRM
     Sorted = False
     TabOrder = 2
     UnboundDataType = wwDefault
+    Visible = False
     OnCloseUp = TableFLDCloseUp
   end
   object Panel1: TPanel
@@ -260,15 +269,15 @@ object M_MainFRM: TM_MainFRM
       Height = 45
       Align = alClient
       Alignment = taCenter
-      Caption = 'Update New Database Param Tables'
+      Caption = 'Delete Customers'
       Layout = tlCenter
-      ExplicitWidth = 473
+      ExplicitWidth = 235
       ExplicitHeight = 32
     end
   end
   object Panel2: TPanel
     Left = 0
-    Top = 558
+    Top = 702
     Width = 1022
     Height = 43
     Align = alBottom
@@ -346,7 +355,7 @@ object M_MainFRM: TM_MainFRM
       OnClick = BitBtn1Click
     end
     object Button1: TButton
-      Left = 233
+      Left = 497
       Top = 4
       Width = 150
       Height = 34
@@ -358,23 +367,25 @@ object M_MainFRM: TM_MainFRM
       Font.Style = []
       ParentFont = False
       TabOrder = 1
+      Visible = False
       OnClick = Button1Click
     end
     object Button3: TButton
-      Left = 436
+      Left = 636
       Top = 4
       Width = 133
       Height = 34
       Caption = 'Copy Tariffs'
       TabOrder = 2
+      Visible = False
       OnClick = Button2Click
     end
   end
-  object wwDBRichEdit1: TwwDBRichEdit
-    Left = 8
-    Top = 100
-    Width = 641
-    Height = 278
+  object Inititial: TwwDBRichEdit
+    Left = 539
+    Top = 124
+    Width = 94
+    Height = 61
     AutoURLDetect = False
     Font.Charset = GREEK_CHARSET
     Font.Color = clWindowText
@@ -414,7 +425,7 @@ object M_MainFRM: TM_MainFRM
     ParentDoubleBuffered = False
     RichEditVersion = 2
     Data = {
-      680300007B5C727466315C616E73695C616E7369637067313235335C64656666
+      AD0300007B5C727466315C616E73695C616E7369637067313235335C64656666
       305C6465666C616E67313033327B5C666F6E7474626C7B5C66305C666E696C5C
       666368617273657430205461686F6D613B7D7B5C66315C666E696C5C66636861
       72736574313631205461686F6D613B7D7D0D0A5C766965776B696E64345C7563
@@ -428,40 +439,85 @@ object M_MainFRM: TM_MainFRM
       3A204461746162617365506172616D734F6C642E7478745C7061720D0A5C6C61
       6E67313033335C663020656469742066696C65203A2044617461626173655061
       72616D734E65772E7478745C7061720D0A52756E205472616E73666572205C70
-      61720D0A5C7061720D0A52657669657720205C7061720D0A445554595F545950
-      45535C7061720D0A44757479207461726966662074656D706C6174657320666F
-      722064656661756C7420746172696666735C7061720D0A5C7061720D0A564154
-      5F43415445474F52592C205C7061720D0A456D61696C5F7265636F7264732C5C
-      7061720D0A53797374656D20506172616D735C7061720D0A5C7061720D0A7365
-      742044656661756C742057616974696E6720526561736F6E20666F72204D6564
-      69756D2056616C75655C7061720D0A5C7061720D0A4164642054617269666673
-      20666F722044484C20616E6420666F7220437573746F6D735C7061720D0A4164
-      64205461726966665F47726F7570735C7061720D0A5C7061720D0A436865636B
-      5C7061720D0A47454E2076616C75657320666F7220696E766F6963652C206D61
-      77622C20637573746F6D657220616E64206576656E20686177625C7061720D0A
-      47656E2076616C7565206F6620637573746F6D657220616674657220696E7365
-      72742121215C7061720D0A5C7061720D0A5C6C616E67313033325C66315C6673
-      31365C7061720D0A7D0D0A00}
+      61720D0A5C7061720D0A526576696577202020445554595F54595045535C7061
+      720D0A456E74657220626173652074617269666620666F722064656661756C74
+      2074617269666673207768656E20757365722063726561746573206120746172
+      6966665C7061720D0A5641545F43415445474F52592C205C7061720D0A456D61
+      696C5F7265636F7264732C5C7061720D0A53797374656D20506172616D735C70
+      61720D0A556E6974206D6561737572655C7061720D0A437573746F6D5F686177
+      625F747970657320287061796D656E74207479706573295C7061720D0A5C7061
+      720D0A7365742044656661756C742057616974696E6720526561736F6E20666F
+      72204D656469756D2056616C75655C7061720D0A5C7061720D0A416464205461
+      726966667320666F722044484C20616E6420666F7220437573746F6D735C7061
+      720D0A416464205461726966665F47726F7570735C7061720D0A5C7061720D0A
+      436865636B5C7061720D0A47454E2076616C75657320666F7220696E766F6963
+      652C206D6177622C20637573746F6D657220616E64206576656E20686177625C
+      7061720D0A47656E2076616C7565206F6620637573746F6D6572206166746572
+      20696E736572742121215C7061720D0A5C7061720D0A5C6C616E67313033325C
+      66315C667331365C7061720D0A7D0D0A00}
   end
   object Button2: TButton
-    Left = 368
-    Top = 384
+    Left = 480
+    Top = 369
     Width = 75
     Height = 25
     Caption = 'Button2'
     TabOrder = 6
+    Visible = False
     OnClick = Button2Click
   end
+  object Button4: TButton
+    Left = 480
+    Top = 400
+    Width = 75
+    Height = 25
+    Caption = 'Button4'
+    TabOrder = 7
+    Visible = False
+  end
+  object RzMemo1: TRzMemo
+    Left = 8
+    Top = 72
+    Width = 384
+    Height = 153
+    TabOrder = 8
+  end
+  object wwButton1: TwwButton
+    AlignWithMargins = True
+    Left = 8
+    Top = 271
+    Width = 200
+    Height = 30
+    Caption = 'Delete Old Customers > Days'
+    Color = clBtnFace
+    DitherColor = clWhite
+    DitherStyle = wwdsDither
+    NumGlyphs = 0
+    ShadeStyle = wwbsNormal
+    TabOrder = 9
+    TextOptions.Alignment = taCenter
+    TextOptions.VAlignment = vaVCenter
+    OnClick = wwButton1Click
+  end
+  object DaysFLD: TwwDBEdit
+    Left = 75
+    Top = 244
+    Width = 121
+    Height = 21
+    TabOrder = 10
+    UnboundDataType = wwDefault
+    WantReturns = False
+    WordWrap = False
+  end
   object OldDb: TIBCConnection
-    Database = 'C:\Data\DelphiProjects\Databases\TokyoTransfer\CABDB.FDB'
+    Database = 'C:\TokyoCab\CURRENTDATA.FDB'
     Options.KeepDesignConnected = False
     DefaultTransaction = OldRead
     SQLDialect = 1
-    ClientLibrary = 'C:\Data\DelphiProjects\TokyoTransfer\Programs\GDS32.DLL'
+    ClientLibrary = 'C:\TokyoCab\GDS32.DLL'
     Port = '3050'
     Username = 'SYSDBA'
     Server = 'localHost'
-    Connected = True
     LoginPrompt = False
     Debug = True
     Left = 64
@@ -469,14 +525,13 @@ object M_MainFRM: TM_MainFRM
     EncryptedPassword = '92FF9EFF8CFF8BFF9AFF8DFF94FF9AFF86FF'
   end
   object NewDB: TIBCConnection
-    Database = 'C:\Data\DelphiProjects\Databases\TokyoTransfer\TOKYOTARIFFDB.FDB'
+    Database = 'C:\TokyoCab\TOKYODATA.FDB'
     Options.KeepDesignConnected = False
     DefaultTransaction = NewRead
-    ClientLibrary = 'C:\Data\DelphiProjects\TokyoTransfer\Programs\GDS32.DLL'
+    ClientLibrary = 'C:\TokyoCab\GDS32.DLL'
     Port = '3050'
     Username = 'SYSDBA'
     Server = 'localHost'
-    Connected = True
     LoginPrompt = False
     Debug = True
     Left = 120
@@ -507,8 +562,8 @@ object M_MainFRM: TM_MainFRM
   end
   object TableSRC: TIBCDataSource
     DataSet = TableSQL
-    Left = 424
-    Top = 240
+    Left = 440
+    Top = 288
   end
   object sourceSQL: TIBCQuery
     LocalUpdate = True
@@ -556,7 +611,6 @@ object M_MainFRM: TM_MainFRM
     Top = 152
   end
   object MetaSQL: TIBCMetaData
-    Active = True
     MetaDataKind = 'Tables'
     Connection = NewDB
     Left = 392
@@ -566,8 +620,8 @@ object M_MainFRM: TM_MainFRM
     Connection = NewDB
     Transaction = NewRead
     UpdateTransaction = NewWrite
-    Left = 320
-    Top = 232
+    Left = 392
+    Top = 296
   end
   object loc1: TwwLocateDialog
     Caption = 'Locate Field Value'
